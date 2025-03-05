@@ -1,0 +1,27 @@
+# Build directories
+build/
+*_artefacts/
+CMakeFiles/
+
+# Compiled Object files
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.a
+*.lib
+
+# macOS specific
+.DS_Store
+
+# JUCE specific
+JuceLibraryCode/
+
+# CMake generated files
+cmake_install.cmake
+CMakeCache.txt
