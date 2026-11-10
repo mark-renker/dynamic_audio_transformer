@@ -1,0 +1,6 @@
+Lovely Transformer - Windows install
+
+1. Copy the "Lovely Transformer.vst3" folder to   C:\Program Files\Common Files\VST3\
+2. Rescan plug-ins in your DAW. The plug-in appears under "Fourier_Ventures_LLC".
+
+The build is not code-signed; if your DAW or SmartScreen warns about an unrecognized publisher, allow it.

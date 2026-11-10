@@ -1,0 +1,8 @@
+Lovely Transformer - manual macOS install (if you prefer not to use the .pkg)
+
+1. Copy "Lovely Transformer.component" to ~/Library/Audio/Plug-Ins/Components/
+2. Copy "Lovely Transformer.vst3" to ~/Library/Audio/Plug-Ins/VST3/
+3. Because the bundles were downloaded (not installed by a .pkg), macOS quarantines them. Clear that once:
+      xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/Components/"Lovely Transformer.component" \
+                                     ~/Library/Audio/Plug-Ins/VST3/"Lovely Transformer.vst3"
+4. Rescan plug-ins in your DAW. The plug-in appears under "Fourier_Ventures_LLC".

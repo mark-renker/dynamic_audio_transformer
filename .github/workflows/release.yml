@@ -1,0 +1,51 @@
+# Tag v* -> macOS universal .pkg installer (+ raw bundles zip) and Windows zip, attached to a GitHub Release.
+name: release
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build (universal, JUCE 8.0.6 via FetchContent)
+        run: cmake -B build-universal -DCMAKE_BUILD_TYPE=Release && cmake --build build-universal -j 4
+      - name: Package installer
+        run: packaging/make_installer.sh
+      - uses: actions/upload-artifact@v4
+        with: { name: macos, path: dist/* }
+  windows:
+    runs-on: windows-2022
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -B build -G "Visual Studio 17 2022" -A x64
+      - run: cmake --build build --config Release --parallel --target TransformerPlugin_VST3
+      - shell: bash
+        run: |
+          VERSION=$(sed -n 's/^project(TransformerPlugin VERSION \([0-9.]*\).*/\1/p' CMakeLists.txt)
+          OUT="Lovely Transformer $VERSION (Windows)"; mkdir -p "$OUT" dist
+          cp -R "build/TransformerPlugin_artefacts/Release/VST3/Lovely Transformer.vst3" "$OUT/"
+          cp packaging/INSTALL-Windows.txt "$OUT/INSTALL.txt"
+          7z a "dist/LovelyTransformer-$VERSION-Windows-x64.zip" "$OUT"
+      - uses: actions/upload-artifact@v4
+        with: { name: windows, path: dist/* }
+  publish:
+    if: always() && startsWith(github.ref, 'refs/tags/v') && needs.macos.result == 'success'
+    needs: [ macos, windows ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: dist }
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**/*
+          body: |
+            ## Install
+            **macOS** (11+, Apple Silicon + Intel): download `LovelyTransformer-*-macOS.pkg`, open it (right-click > Open if Gatekeeper objects: the installer is not notarized), tick the formats you want (AU, VST3). Done; rescan plug-ins in your DAW.
+            **Windows** (x64): download `LovelyTransformer-*-Windows-x64.zip`, unzip, copy the `Lovely Transformer.vst3` folder to `C:\Program Files\Common Files\VST3\`.
+            The plug-in appears under **Fourier_Ventures_LLC > Lovely Transformer**. The `-macOS-bundles.zip` holds the raw bundles for manual installs.
+          generate_release_notes: true
